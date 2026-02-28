@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>Studio Manager + Menu QR</title>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<style>
+body { background:#111; color:white; font-family:Arial; margin:0; padding:0; }
+nav { background:#222; padding:10px; text-align:center; }
+nav a { color:white; margin:0 15px; text-decoration:none; font-weight:bold; }
+nav a:hover { color:#00c853; }
+.container { padding:20px; text-align:center; }
+button { background:#00c853; border:none; color:white; padding:10px 15px; margin:5px; cursor:pointer; }
+#exportButton, #importButton { background:#d32f2f !important; }
+table { margin:auto; margin-top:20px; border-collapse:collapse; width:90%; }
+td, th { border:1px solid #444; padding:8px; text-align:center; }
+th { background:#222; }
+</style>
+</head>
+<body>
+
+<!-- Menu déroulant / navigation simple -->
+<nav>
+  <a href="index.html">Gestion Matériel</a>
+  <a href="liste.des.obger.html">liste des obger</a>
+</nav>
+
+
+<title>Inventaire Studio</title>
+<style>
+body { background:#111; color:white; font-family:Arial; text-align:center; padding:20px; }
+table { margin:auto; margin-top:20px; border-collapse:collapse; width:90%; }
+td, th { border:1px solid #444; padding:10px; text-align:center; }
+th { background:#222; }
+.dispo { color:#00c853; font-weight:bold; }
+.pret { color:#ff5252; font-weight:bold; }
+h2 { margin-top:40px; }
+</style>
+</head>
+<body>
+
+<h1>📦 Inventaire du Studio</h1>
+
+<h2>📊 Résumé</h2>
+<p id="resume"></p>
+
+<table id="tableau">
+<tr>
+<th>Matériel</th>
+<th>Statut</th>
+<th>Dernier Emprunteur</th>
+<th>Date</th>
+</tr>
+</table>
+
+<script>
+
+// 🔥 LISTE DE TOUS TES OBJETS (à adapter)
+const inventaire = [
+  "SSD",
+];
+
+let logs = JSON.parse(localStorage.getItem('logs')) || [];
+let etatMateriel = {};
+
+// Analyse des logs pour connaître le dernier statut
+logs.forEach(log => {
+  etatMateriel[log.materiel] = log;
+});
+
+let total = inventaire.length;
+let dispoCount = 0;
+let pretCount = 0;
+
+const table = document.getElementById("tableau");
+
+// Affichage
+inventaire.forEach(item => {
+
+  const row = table.insertRow();
+  row.insertCell(0).innerText = item;
+
+  if(etatMateriel[item] && etatMateriel[item].statut === "PRÊT"){
+
+    row.insertCell(1).innerHTML = "<span class='pret'>PRÊTÉ</span>";
+    row.insertCell(2).innerText = etatMateriel[item].nom;
+    row.insertCell(3).innerText = etatMateriel[item].date;
+    pretCount++;
+
+  } else {
+
+    row.insertCell(1).innerHTML = "<span class='dispo'>DISPONIBLE</span>";
+    row.insertCell(2).innerText = "-";
+    row.insertCell(3).innerText = "-";
+    dispoCount++;
+  }
+
+});
+
+document.getElementById("resume").innerHTML =
+  "Total : " + total +
+  " | 🟢 Disponibles : " + dispoCount +
+  " | 🔴 Prêtés : " + pretCount;
+
+</script>
+
+</body>
+</html>

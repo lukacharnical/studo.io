@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Studio Manager - Renommage Auto</title>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<style>
+body { background:#111; color:white; font-family:Arial; margin:0; padding:0; }
+nav { background:#222; padding:10px; text-align:center; }
+nav a { color:white; margin:0 15px; text-decoration:none; font-weight:bold; }
+nav a:hover { color:#00c853; }
+.container { padding:20px; text-align:center; }
+#reader { width:300px; margin:auto; }
+input, button { padding:10px; margin:10px; }
+button { background:#00c853; border:none; color:white; cursor:pointer; }
+table { margin:auto; margin-top:20px; border-collapse:collapse; width:90%; }
+td, th { border:1px solid #444; padding:8px; text-align:center; }
+th { background:#222; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Gestion Matériel</a>
+  <a href="liste.des.obger.html">Liste des objets</a>
+</nav>
+
+<div class="container">
+
+<h1>🎛 Studio Manager</h1>
+
+<div id="reader"></div>
+
+<h3 id="materiel">Matériel :</h3>
+<input type="text" id="nom" placeholder="Nom">
+<br>
+<button onclick="enregistrer('PRÊT')">PRÊT</button>
+<button onclick="enregistrer('RETOUR')">RETOUR</button>
+
+<table id="tableau">
+<tr><th>Matériel</th><th>Nom</th><th>Date</th><th>Statut</th></tr>
+</table>
+
+</div>
+
+<script>
+let currentMateriel = "";
+let logs = JSON.parse(localStorage.getItem('logs')) || [];
+logs.forEach(l => addRow(l));
+
+/* 🔥 RENOMMAGE DES CODES BARRES */
+const materielMap = {
+  "N/S441237600455": "SSD"
+};
+
+function onScanSuccess(decodedText) {
+
+  // Nettoyage du texte scanné (important)
+  decodedText = decodedText.trim();
+
+  if(materielMap[decodedText]){
+    currentMateriel = materielMap[decodedText];
+  } else {
+    currentMateriel = decodedText;
+  }
+
+  document.getElementById("materiel").innerText =
+    "Matériel : " + currentMateriel;
+}
+
+new Html5QrcodeScanner("reader",{fps:10,qrbox:250}).render(onScanSuccess);
+
+function addRow(l){
+  const table = document.getElementById("tableau");
+  const row = table.insertRow();
+  row.insertCell(0).innerText = l.materiel;
+  row.insertCell(1).innerText = l.nom;
+  row.insertCell(2).innerText = l.date;
+  row.insertCell(3).innerText = l.statut;
+}
+
+function enregistrer(statut){
+  if(!currentMateriel){
+    alert("Scanne un QR code !");
+    return;
+  }
+
+  const nom = document.getElementById("nom").value;
+  if(!nom){
+    alert("Indique ton nom !");
+    return;
+  }
+
+  const date = new Date().toLocaleString();
+  const log = {materiel: currentMateriel, nom, date, statut};
+
+  logs.push(log);
+  localStorage.setItem('logs', JSON.stringify(logs));
+  addRow(log);
+
+  document.getElementById("nom").value="";
+}
+</script>
+
+</body>
+</html>
